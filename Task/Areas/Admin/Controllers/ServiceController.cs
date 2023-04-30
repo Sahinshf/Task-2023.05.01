@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using Task.Contexts;
 
 namespace Task.Areas.Admin.Controllers
@@ -31,12 +32,28 @@ namespace Task.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(Service service)
+        public IActionResult Create(Service service )
         {
+
+            if (_context.Services.Count() > 2)
+            {
+                return BadRequest();
+            }
+
+            List<Service> services = _context.Services.ToList();
+            foreach (var item in services)
+            {
+                if (item.Name == service.Name)
+                {
+                    return NotFound();
+
+                }
+            }
+
             _context.Services.Add(service); 
             _context.SaveChanges();
 
-            return View();
+            return RedirectToAction(nameof(Index));
         }
 
         public IActionResult Detail(int id) { 
@@ -81,7 +98,7 @@ namespace Task.Areas.Admin.Controllers
             _context.Services.Remove(service);
             _context.SaveChanges();
 
-            return View(service);
+            return RedirectToAction(nameof(Index));
         }
 
         public IActionResult Update(int id)
@@ -118,9 +135,18 @@ namespace Task.Areas.Admin.Controllers
             {
                 return NotFound();
             }
+
+            List<Service> services = _context.Services.ToList();
+            foreach (var item in services)
+            {
+                if (item.Name == service.Name)
+                {
+                    return NotFound();
+
+                }
+            }
+
             _context.Services.Update(serviceItem);
-
-
             _context.SaveChanges();
             return RedirectToAction(nameof(Index));
 
